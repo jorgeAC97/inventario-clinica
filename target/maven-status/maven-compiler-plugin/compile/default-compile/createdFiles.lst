@@ -1,0 +1,4 @@
+module-info.class
+com\clinica\App.class
+com\clinica\PrimaryController.class
+com\clinica\SecondaryController.class
