@@ -27,8 +27,8 @@ public class ConexionMongo {
             MongoDatabase database = mongoClient.getDatabase(DB_EMPRESA);
             MongoCollection<Document> usuarios = database.getCollection(COLLECTION_USUARIOS);
 
-            Document query = new Document("nombre", usuario)
-                    .append("contraseña", contrasena);
+            Document query = new Document("usuario", usuario)
+                    .append("password", contrasena);
             Document resultado = usuarios.find(query).first();
 
             return resultado != null;
