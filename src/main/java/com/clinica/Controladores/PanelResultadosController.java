@@ -57,9 +57,6 @@ public class PanelResultadosController {
                 } else {
                     currentItem = item;
                     textFlow.getChildren().clear();
-                    setStyle("-fx-background-color: #2b2b2b;");
-
-                    addFormattedText("--------------------------------\n", Color.GRAY);
                     addFormattedText("-Código: ", Color.RED);
                     addFormattedText(item.getString("codigo") + "\n", Color.WHITE);
                     addFormattedText("-Nombre: ", Color.RED);
@@ -74,6 +71,8 @@ public class PanelResultadosController {
                     spinnerUnidades.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, unidades));
                     textFlow.getChildren().add(spinnerUnidades);
                     addFormattedText("\n", Color.WHITE);
+
+                    textFlow.getStyleClass().add("resultado-panel");
 
                     setGraphic(textFlow);
                 }

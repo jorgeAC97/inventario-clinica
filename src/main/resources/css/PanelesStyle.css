@@ -1,0 +1,45 @@
+/* Fondo de pantalla igual que el inicio de sesión */
+.root {
+    -fx-background-color: linear-gradient(to left, #606C38, #283618, #131A0B);
+}
+
+/* Panel de cristal principal */
+.cristal-panel {
+    -fx-background-color: linear-gradient(to bottom, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-width: 0;
+    -fx-padding: 25;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 16, 0.18, 0, 4);
+}
+
+/* Paneles internos dentro del panel de cristal */
+.cristal-panel .panel-interno {
+    -fx-background-color: transparent;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 0;
+    -fx-padding: 12;
+}
+
+.titulo-panel {
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.boton-mover {
+    -fx-background-radius: 50%;
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-max-width: 48px;
+    -fx-max-height: 48px;
+    -fx-background-color: rgba(255,255,255,0.18);
+    -fx-cursor: move;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 6, 0.18, 0, 2);
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+} 

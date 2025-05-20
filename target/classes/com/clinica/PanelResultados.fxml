@@ -7,13 +7,14 @@
 
 <VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="com.clinica.Controladores.PanelResultadosController" 
-      alignment="CENTER" spacing="15.0" VBox.vgrow="ALWAYS">
+      alignment="CENTER" spacing="15.0" VBox.vgrow="ALWAYS"
+      stylesheets="@../../css/PanelesStyle.css,@../../css/Resultados.css" styleClass="cristal-panel">
     <padding>
         <Insets top="20.0" right="20.0" bottom="20.0" left="20.0" />
     </padding>
-    <Label text="Resultados" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+    <Label text="Resultados" styleClass="titulo-panel" />
     <ListView fx:id="listaResultados" VBox.vgrow="ALWAYS" prefWidth="500" 
-              style="-fx-background-color: #2b2b2b; -fx-control-inner-background: #2b2b2b;">
+              styleClass="panel-interno">
         <padding>
             <Insets top="10.0" right="10.0" bottom="10.0" left="10.0" />
         </padding>

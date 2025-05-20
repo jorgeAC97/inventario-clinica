@@ -17,11 +17,18 @@ public class PanelLocalizadorController {
     private TextField txtBuscar;
     @FXML
     private Button btnBuscar;
+    @FXML
+    private Button btnMover;
+    @FXML
+    private javafx.scene.layout.VBox rootVBox;
 
     private PanelResultadosController resultadosController;
     private ExecutorService executorService;
     private AtomicInteger searchCounter;
     private static final int SEARCH_DELAY = 300; // milisegundos
+
+    private double mouseAnchorX;
+    private double mouseAnchorY;
 
     public void setResultadosController(PanelResultadosController controller) {
         this.resultadosController = controller;
@@ -48,6 +55,26 @@ public class PanelLocalizadorController {
                     Thread.currentThread().interrupt();
                 }
             });
+        });
+
+        // Lógica de arrastre
+        btnMover.setOnMousePressed(event -> {
+            mouseAnchorX = event.getSceneX() - rootVBox.getLayoutX();
+            mouseAnchorY = event.getSceneY() - rootVBox.getLayoutY();
+        });
+        btnMover.setOnMouseDragged(event -> {
+            double newX = event.getSceneX() - mouseAnchorX;
+            double newY = event.getSceneY() - mouseAnchorY;
+            // Limitar el movimiento dentro del contenedor padre
+            javafx.scene.layout.Pane parent = (javafx.scene.layout.Pane) rootVBox.getParent();
+            if (parent != null) {
+                double maxX = parent.getWidth() - rootVBox.getWidth();
+                double maxY = parent.getHeight() - rootVBox.getHeight();
+                newX = Math.max(0, Math.min(newX, maxX));
+                newY = Math.max(0, Math.min(newY, maxY));
+            }
+            rootVBox.setLayoutX(newX);
+            rootVBox.setLayoutY(newY);
         });
     }
 
