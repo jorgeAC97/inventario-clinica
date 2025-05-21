@@ -9,14 +9,18 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class PanelInventarioController {
     @FXML
     private Button btnRegresar;
     @FXML
-    private HBox root;
+    private StackPane root;
+
+    private double mouseAnchorX;
+    private double mouseAnchorY;
 
     @FXML
     private void initialize() {
@@ -30,9 +34,36 @@ public class PanelInventarioController {
             Parent resultadosNode = resultadosLoader.load();
             PanelResultadosController resultadosController = resultadosLoader.getController();
 
-            // Limpiar y añadir los nodos al root
+            // Limpiar y añadir los nodos al root (StackPane)
             root.getChildren().clear();
-            root.getChildren().addAll(localizadorNode, resultadosNode);
+            root.getChildren().addAll(resultadosNode, localizadorNode); // resultados al fondo, localizador encima
+
+            // Quitar alineación automática para permitir movimiento libre
+            StackPane.setAlignment(localizadorNode, null);
+
+            // Forzar que el panel localizador solo ocupe el tamaño de su contenido
+            ((Region) localizadorNode).setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            ((Region) localizadorNode).setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+            ((Region) localizadorNode).setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+
+            // Posicionar el panel localizador en una posición inicial (por ejemplo, arriba a la izquierda)
+            localizadorNode.setLayoutX(30);
+            localizadorNode.setLayoutY(30);
+
+            // Obtener el botón mover del controlador localizador
+            Button btnMover = localizadorController.getBtnMover();
+
+            // Lógica de arrastre SOLO en el botón mover
+            btnMover.setOnMousePressed(event -> {
+                mouseAnchorX = event.getSceneX() - localizadorNode.getLayoutX();
+                mouseAnchorY = event.getSceneY() - localizadorNode.getLayoutY();
+            });
+            btnMover.setOnMouseDragged(event -> {
+                double newX = event.getSceneX() - mouseAnchorX;
+                double newY = event.getSceneY() - mouseAnchorY;
+                localizadorNode.setLayoutX(newX);
+                localizadorNode.setLayoutY(newY);
+            });
 
             // Conectar los controladores
             localizadorController.setResultadosController(resultadosController);

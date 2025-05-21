@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 public class PanelLocalizadorController {
     @FXML
@@ -20,7 +21,7 @@ public class PanelLocalizadorController {
     @FXML
     private Button btnMover;
     @FXML
-    private javafx.scene.layout.VBox rootVBox;
+    private VBox rootVBox;
 
     private PanelResultadosController resultadosController;
     private ExecutorService executorService;
@@ -65,14 +66,6 @@ public class PanelLocalizadorController {
         btnMover.setOnMouseDragged(event -> {
             double newX = event.getSceneX() - mouseAnchorX;
             double newY = event.getSceneY() - mouseAnchorY;
-            // Limitar el movimiento dentro del contenedor padre
-            javafx.scene.layout.Pane parent = (javafx.scene.layout.Pane) rootVBox.getParent();
-            if (parent != null) {
-                double maxX = parent.getWidth() - rootVBox.getWidth();
-                double maxY = parent.getHeight() - rootVBox.getHeight();
-                newX = Math.max(0, Math.min(newX, maxX));
-                newY = Math.max(0, Math.min(newY, maxY));
-            }
             rootVBox.setLayoutX(newX);
             rootVBox.setLayoutY(newY);
         });
@@ -93,5 +86,9 @@ public class PanelLocalizadorController {
         if (executorService != null) {
             executorService.shutdown();
         }
+    }
+
+    public Button getBtnMover() {
+        return btnMover;
     }
 } 

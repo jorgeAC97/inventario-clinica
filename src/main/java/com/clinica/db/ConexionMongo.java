@@ -1,5 +1,8 @@
 package com.clinica.db;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +51,7 @@ public class ConexionMongo {
                             .append("dimension", 1)
                             .append("unidades", 1)
                             .append("ViaAdmin", 1)
+                            .append("precio", 1)
                             .append("_id", 0));
 
             for (Document doc : resultados) {
@@ -70,6 +74,7 @@ public class ConexionMongo {
                         .append("dimension", 1)
                         .append("unidades", 1)
                         .append("ViaAdmin", 1)
+                        .append("precio", 1)
                         .append("_id", 0));
 
             for (Document doc : resultados) {
@@ -120,7 +125,7 @@ public class ConexionMongo {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String uri = "mongodb://localhost:27017"; // Conexión al contenedor expuesto en tu máquina
 
         try (MongoClient mongoClient = MongoClients.create(uri)) {
@@ -130,5 +135,7 @@ public class ConexionMongo {
         } catch (Exception e) {
             System.out.println("Error al conectar a MongoDB: " + e.getMessage());
         }
+
+        String contenido = new String(Files.readAllBytes(Paths.get("src/main/java/com/clinica/colecionJSON/Inventario.farmacia.json")));
     }
 } 

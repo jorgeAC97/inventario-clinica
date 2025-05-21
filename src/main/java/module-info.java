@@ -4,6 +4,7 @@ module com.clinica {
     requires org.mongodb.driver.sync.client;
     requires org.mongodb.bson;
     requires org.mongodb.driver.core;
+    requires com.google.gson;
 
     opens com.clinica to javafx.fxml;
     opens com.clinica.Controladores to javafx.fxml;
