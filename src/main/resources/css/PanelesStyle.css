@@ -5,20 +5,22 @@
 
 /* Panel de cristal principal */
 .cristal-panel {
-    -fx-background-color: linear-gradient(to bottom, rgba(255,255,255,0.18), rgba(255,255,255,0.10));
+    -fx-background-color: rgba(0, 0, 0, 0.85);
     -fx-background-radius: 18;
     -fx-border-radius: 18;
-    -fx-border-width: 0;
+    -fx-border-width: 1;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
     -fx-padding: 25;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 16, 0.18, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 16, 0.18, 0, 4);
 }
 
 /* Paneles internos dentro del panel de cristal */
 .cristal-panel .panel-interno {
-    -fx-background-color: transparent;
+    -fx-background-color: rgba(0, 0, 0, 0.7);
     -fx-background-radius: 14;
     -fx-border-radius: 14;
-    -fx-border-width: 0;
+    -fx-border-width: 1;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
     -fx-padding: 12;
 }
 
@@ -28,20 +30,91 @@
     -fx-font-weight: bold;
 }
 
+/* Estilo para los campos de texto */
+.campo-busqueda {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: gray;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+/* Estilo para los botones principales */
+.boton-principal {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.boton-principal:hover {
+    -fx-background-color: rgba(40, 40, 40, 0.8);
+}
+
+/* Estilo para los botones secundarios */
+.boton-secundario {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.boton-secundario:hover {
+    -fx-background-color: rgba(40, 40, 40, 0.6);
+}
+
 .boton-mover {
     -fx-background-radius: 50%;
     -fx-min-width: 48px;
     -fx-min-height: 48px;
     -fx-max-width: 48px;
     -fx-max-height: 48px;
-    -fx-background-color: rgba(255,255,255,0.18);
+    -fx-background-color: rgba(0, 0, 0, 0.7);
     -fx-cursor: move;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 6, 0.18, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 6, 0.18, 0, 2);
     -fx-padding: 0;
-    -fx-border-width: 0;
-    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
+}
+
+/* Estilo para el panel de resultados */
+.resultado-panel {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-padding: 10;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+}
+
+/* Estilo para el spinner de unidades */
+.spinner {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-text-fill: white;
+}
+
+.spinner .text-field {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-text-fill: white;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: rgba(0, 0, 0, 0.8);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+}
+
+.spinner .increment-arrow,
+.spinner .decrement-arrow {
+    -fx-background-color: white;
 }
 
 .cristal-panel-localizador {

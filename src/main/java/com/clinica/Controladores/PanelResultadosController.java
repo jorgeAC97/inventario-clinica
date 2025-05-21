@@ -65,6 +65,9 @@ public class PanelResultadosController {
                     addFormattedText(item.getString("dimension") + "\n", Color.WHITE);
                     addFormattedText("-Via de administración: ", Color.RED);
                     addFormattedText(item.getString("ViaAdmin") + "\n", Color.WHITE);
+                    addFormattedText("-Precio: ", Color.RED);
+                    Double precio = item.get("precio") != null ? ((Number)item.get("precio")).doubleValue() : 0.0;
+                    addFormattedText(String.format("%.2f€", precio) + "\n", Color.WHITE);
                     addFormattedText("-unidades: ", Color.RED);
 
                     int unidades = item.getInteger("unidades", 0);
@@ -91,5 +94,9 @@ public class PanelResultadosController {
         System.out.println("Mostrando en lista: " + resultados.size());
         ObservableList<Document> lista = FXCollections.observableArrayList(resultados);
         listaResultados.setItems(lista);
+    }
+
+    public void limpiarResultados() {
+        listaResultados.getItems().clear();
     }
 } 

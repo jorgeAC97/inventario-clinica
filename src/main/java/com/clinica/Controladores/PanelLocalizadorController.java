@@ -9,9 +9,13 @@ import org.bson.Document;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class PanelLocalizadorController {
     @FXML
@@ -21,15 +25,48 @@ public class PanelLocalizadorController {
     @FXML
     private Button btnMover;
     @FXML
+    private Button btnLimpiar;
+    @FXML
+    private Button btnSalir;
+    @FXML
     private VBox rootVBox;
 
     private PanelResultadosController resultadosController;
     private ExecutorService executorService;
     private AtomicInteger searchCounter;
     private static final int SEARCH_DELAY = 300; // milisegundos
+    private Stage stage;
+    private double xOffset = 0;
+    private double yOffset = 0;
 
-    private double mouseAnchorX;
-    private double mouseAnchorY;
+    public static void mostrarVentana() {
+        try {
+            FXMLLoader loader = new FXMLLoader(PanelLocalizadorController.class.getResource("/com/clinica/PanelLocalizador.fxml"));
+            VBox root = loader.load();
+            
+            Stage stage = new Stage(StageStyle.TRANSPARENT); // Cambiado a TRANSPARENT para permitir bordes redondeados
+            Scene scene = new Scene(root);
+            scene.setFill(null); // Hacer el fondo de la escena transparente
+            
+            // Aplicar los estilos CSS
+            scene.getStylesheets().addAll(
+                PanelLocalizadorController.class.getResource("/css/PanelesStyle.css").toExternalForm()
+            );
+            
+            stage.setScene(scene);
+            stage.setAlwaysOnTop(true);
+            stage.show();
+
+            PanelLocalizadorController controller = loader.getController();
+            controller.setStage(stage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     public void setResultadosController(PanelResultadosController controller) {
         this.resultadosController = controller;
@@ -58,16 +95,32 @@ public class PanelLocalizadorController {
             });
         });
 
-        // Lógica de arrastre
+        // Configurar el botón mover para arrastrar la ventana
         btnMover.setOnMousePressed(event -> {
-            mouseAnchorX = event.getSceneX() - rootVBox.getLayoutX();
-            mouseAnchorY = event.getSceneY() - rootVBox.getLayoutY();
+            xOffset = event.getSceneX();
+            yOffset = event.getSceneY();
         });
+
         btnMover.setOnMouseDragged(event -> {
-            double newX = event.getSceneX() - mouseAnchorX;
-            double newY = event.getSceneY() - mouseAnchorY;
-            rootVBox.setLayoutX(newX);
-            rootVBox.setLayoutY(newY);
+            if (stage != null) {
+                stage.setX(event.getScreenX() - xOffset);
+                stage.setY(event.getScreenY() - yOffset);
+            }
+        });
+
+        // Acción Limpiar
+        btnLimpiar.setOnAction(e -> {
+            txtBuscar.clear();
+            if (resultadosController != null) {
+                resultadosController.limpiarResultados();
+            }
+        });
+
+        // Acción Salir
+        btnSalir.setOnAction(e -> {
+            shutdown();
+            Platform.exit();
+            System.exit(0);
         });
     }
 
@@ -85,6 +138,9 @@ public class PanelLocalizadorController {
     public void shutdown() {
         if (executorService != null) {
             executorService.shutdown();
+        }
+        if (stage != null) {
+            stage.close();
         }
     }
 
