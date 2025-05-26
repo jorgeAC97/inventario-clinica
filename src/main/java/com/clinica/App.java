@@ -1,7 +1,8 @@
 package com.clinica;
 
 import java.io.IOException;
-import java.net.Socket;
+
+import com.clinica.cliente.ClienteComunicacion;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -16,15 +17,21 @@ public class App extends Application {
 
     private static Scene VentanaPrincipal;
     private static final int PUERTO_SERVIDOR = 50005;
-    private static Socket socketCliente;
+    private static ClienteComunicacion clienteComunicacion;
     private static boolean servidorConectado = false;
     
     private void conectarServidor() {
         try {
-            socketCliente = new Socket("localhost", PUERTO_SERVIDOR);
-            servidorConectado = true;
-            System.out.println("Conectado al servidor en el puerto " + PUERTO_SERVIDOR);
-        } catch (IOException e) {
+            clienteComunicacion = new ClienteComunicacion();
+            servidorConectado = clienteComunicacion.conectar("localhost", PUERTO_SERVIDOR);
+            
+            if (servidorConectado) {
+                System.out.println("Conectado al servidor en el puerto " + PUERTO_SERVIDOR);
+            } else {
+                System.out.println("Servidor no disponible. La aplicación funcionará en modo local.");
+                System.out.println("Para usar funcionalidades de red, inicie el servidor primero.");
+            }
+        } catch (Exception e) {
             servidorConectado = false;
             System.out.println("Servidor no disponible. La aplicación funcionará en modo local.");
             System.out.println("Para usar funcionalidades de red, inicie el servidor primero.");
@@ -52,22 +59,22 @@ public class App extends Application {
     @Override
     public void stop() {
         try {
-            if (socketCliente != null && !socketCliente.isClosed()) {
-                socketCliente.close();
+            if (clienteComunicacion != null && clienteComunicacion.isConectado()) {
+                clienteComunicacion.desconectar();
                 System.out.println("Conexión con el servidor cerrada");
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error al cerrar la conexión con el servidor: " + e.getMessage());
         }
     }
 
     // Métodos estáticos para acceder al estado del servidor
     public static boolean isServidorConectado() {
-        return servidorConectado;
+        return servidorConectado && clienteComunicacion != null && clienteComunicacion.isConectado();
     }
 
-    public static Socket getSocketCliente() {
-        return socketCliente;
+    public static ClienteComunicacion getClienteComunicacion() {
+        return clienteComunicacion;
     }
 
     public static void main(String[] args) {

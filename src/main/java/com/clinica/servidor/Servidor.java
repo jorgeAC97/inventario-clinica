@@ -33,7 +33,12 @@ public class Servidor {
                     System.out.println("Cliente conectado desde: " + socketCliente.getInetAddress());
                     
                     GestionadorCliente gestor = new GestionadorCliente(socketCliente);
-                    clientesConectados.add(gestor);
+                    synchronized (clientesConectados) {
+                        // Limpiar clientes desconectados antes de agregar uno nuevo
+                        clientesConectados.removeIf(cliente -> !cliente.estaConectado());
+                        clientesConectados.add(gestor);
+                        System.out.println("Clientes conectados: " + clientesConectados.size());
+                    }
                     poolHilos.execute(gestor);
                     
                 } catch (IOException e) {
@@ -51,10 +56,12 @@ public class Servidor {
         ejecutando = false;
         try {
             // Cerrar todas las conexiones de clientes
-            for (GestionadorCliente cliente : clientesConectados) {
-                cliente.desconectar();
+            synchronized (clientesConectados) {
+                for (GestionadorCliente cliente : clientesConectados) {
+                    cliente.desconectar();
+                }
+                clientesConectados.clear();
             }
-            clientesConectados.clear();
             
             // Cerrar el pool de hilos
             poolHilos.shutdown();
