@@ -1,5 +1,4 @@
 com\clinica\servicios\ServicioInventario.class
-com\clinica\data\ProductoFarmacia.class
 com\clinica\servidor\Servidor.class
 com\clinica\db\ImportarDatos.class
 com\clinica\Controladores\PanelInventarioController.class
