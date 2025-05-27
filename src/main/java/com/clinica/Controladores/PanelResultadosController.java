@@ -2,6 +2,8 @@ package com.clinica.Controladores;
 
 import org.bson.Document;
 
+import com.clinica.servicios.ServicioInventario;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,15 +37,54 @@ public class PanelResultadosController {
                 spinnerUnidades.setPrefWidth(80);
                 spinnerUnidades.setEditable(true);
                 spinnerUnidades.valueProperty().addListener((obs, oldValue, newValue) -> {
-                    if (currentItem != null && newValue != null && !newValue.equals(oldValue)) {
-                        // Actualizar en la base de datos
-                        new Thread(() -> {
-                            com.clinica.db.ConexionMongo.actualizarUnidadesProducto(currentItem.getString("codigo"), newValue);
-                            // Actualizar el documento localmente
-                            Platform.runLater(() -> {
-                                currentItem.put("unidades", newValue);
-                            });
-                        }).start();
+                    // Validaciones para evitar NullPointerException
+                    if (currentItem != null && newValue != null && oldValue != null && 
+                        !newValue.equals(oldValue) && currentItem.containsKey("codigo")) {
+                        
+                        String codigo = currentItem.getString("codigo");
+                        if (codigo != null && !codigo.trim().isEmpty()) {
+                            // Actualizar en la base de datos
+                            new Thread(() -> {
+                                try {
+                                    ServicioInventario.actualizarUnidades(codigo, newValue)
+                                        .thenAccept(exito -> {
+                                            if (exito) {
+                                                // Actualizar el documento localmente
+                                                Platform.runLater(() -> {
+                                                    currentItem.put("unidades", newValue);
+                                                });
+                                                System.out.println("Unidades actualizadas para " + codigo + ": " + newValue + " (Modo: " + ServicioInventario.getModoOperacion() + ")");
+                                            } else {
+                                                System.err.println("Error al actualizar unidades para " + codigo);
+                                                // Revertir el valor en caso de error
+                                                Platform.runLater(() -> {
+                                                    if (oldValue != null) {
+                                                        spinnerUnidades.getValueFactory().setValue(oldValue);
+                                                    }
+                                                });
+                                            }
+                                        })
+                                        .exceptionally(throwable -> {
+                                            System.err.println("Error al actualizar unidades para " + codigo + ": " + throwable.getMessage());
+                                            // Revertir el valor en caso de error
+                                            Platform.runLater(() -> {
+                                                if (oldValue != null) {
+                                                    spinnerUnidades.getValueFactory().setValue(oldValue);
+                                                }
+                                            });
+                                            return null;
+                                        });
+                                } catch (Exception e) {
+                                    System.err.println("Error al actualizar unidades para " + codigo + ": " + e.getMessage());
+                                    // Revertir el valor en caso de error
+                                    Platform.runLater(() -> {
+                                        if (oldValue != null) {
+                                            spinnerUnidades.getValueFactory().setValue(oldValue);
+                                        }
+                                    });
+                                }
+                            }).start();
+                        }
                     }
                 });
             }
@@ -57,27 +98,55 @@ public class PanelResultadosController {
                 } else {
                     currentItem = item;
                     textFlow.getChildren().clear();
-                    addFormattedText("-Código: ", Color.RED);
-                    addFormattedText(item.getString("codigo") + "\n", Color.WHITE);
-                    addFormattedText("-Nombre: ", Color.RED);
-                    addFormattedText(item.getString("nombre") + "\n", Color.WHITE);
-                    addFormattedText("-Dimensión: ", Color.RED);
-                    addFormattedText(item.getString("dimension") + "\n", Color.WHITE);
-                    addFormattedText("-Via de administración: ", Color.RED);
-                    addFormattedText(item.getString("ViaAdmin") + "\n", Color.WHITE);
-                    addFormattedText("-Precio: ", Color.RED);
-                    Double precio = item.get("precio") != null ? ((Number)item.get("precio")).doubleValue() : 0.0;
-                    addFormattedText(String.format("%.2f€", precio) + "\n", Color.WHITE);
-                    addFormattedText("-unidades: ", Color.RED);
+                    
+                    try {
+                        addFormattedText("-Código: ", Color.RED);
+                        addFormattedText(getStringValue(item, "codigo") + "\n", Color.WHITE);
+                        addFormattedText("-Nombre: ", Color.RED);
+                        addFormattedText(getStringValue(item, "nombre") + "\n", Color.WHITE);
+                        addFormattedText("-Dimensión: ", Color.RED);
+                        addFormattedText(getStringValue(item, "dimension") + "\n", Color.WHITE);
+                        addFormattedText("-Via de administración: ", Color.RED);
+                        addFormattedText(getStringValue(item, "ViaAdmin") + "\n", Color.WHITE);
+                        addFormattedText("-Precio: ", Color.RED);
+                        // Manejo seguro del precio
+                        double precio = 0.0;
+                        Object precioObj = item.get("precio");
+                        if (precioObj instanceof Number) {
+                            precio = ((Number) precioObj).doubleValue();
+                        }
+                        addFormattedText(String.format("%.2f€", precio) + "\n", Color.WHITE);
+                        addFormattedText("-unidades: ", Color.RED);
 
-                    int unidades = item.getInteger("unidades", 0);
-                    spinnerUnidades.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, unidades));
-                    textFlow.getChildren().add(spinnerUnidades);
-                    addFormattedText("\n", Color.WHITE);
+                        // Manejo seguro de unidades (puede ser Double o Integer)
+                        int unidades = 0;
+                        Object unidadesObj = item.get("unidades");
+                        if (unidadesObj instanceof Number) {
+                            unidades = ((Number) unidadesObj).intValue();
+                        }
+                        
+                        spinnerUnidades.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, unidades));
+                        textFlow.getChildren().add(spinnerUnidades);
+                        addFormattedText("\n", Color.WHITE);
 
-                    textFlow.getStyleClass().add("resultado-panel");
+                        textFlow.getStyleClass().add("resultado-panel");
+                        setGraphic(textFlow);
+                    } catch (Exception e) {
+                        System.err.println("Error al mostrar item: " + e.getMessage());
+                        // Mostrar un texto de error en lugar de fallar
+                        textFlow.getChildren().clear();
+                        addFormattedText("Error al cargar producto", Color.RED);
+                        setGraphic(textFlow);
+                    }
+                }
+            }
 
-                    setGraphic(textFlow);
+            private String getStringValue(Document doc, String key) {
+                try {
+                    String value = doc.getString(key);
+                    return value != null ? value : "N/A";
+                } catch (Exception e) {
+                    return "N/A";
                 }
             }
 
