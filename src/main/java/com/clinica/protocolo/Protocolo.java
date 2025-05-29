@@ -27,6 +27,13 @@ public interface Protocolo {
     int NOT_FOUND = 404;
     int SERVER_ERROR = 500;
     int DATABASE_ERROR = 501;
+
+    // Códigos que debe manejar el servidor de inventario
+    static final int OBTENER_MEDICAMENTOS_INVENTARIO = 9001;
+    static final int OBTENER_MEDICAMENTOS_INVENTARIO_RESPONSE = 9002;
+    static final int BUSCAR_MEDICAMENTOS_INVENTARIO = 9003;
+    static final int BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE = 9004;
+    static final int ERROR_INVENTARIO = 9999;
     
     // Métodos de utilidad para construir mensajes
     static String construirMensaje(int codigo, String... parametros) {

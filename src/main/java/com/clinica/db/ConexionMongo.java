@@ -125,6 +125,66 @@ public class ConexionMongo {
         }
     }
 
+    // Método para obtener medicamentos con stock > 0
+    public static List<Document> obtenerMedicamentosConStock() {
+        List<Document> lista = new ArrayList<>();
+        try (MongoClient mongoClient = MongoClients.create(URI)) {
+            MongoDatabase database = mongoClient.getDatabase(DB_INVENTARIO);
+            MongoCollection<Document> farmacia = database.getCollection(COLLECTION_FARMACIA);
+
+            // Query para obtener medicamentos donde unidades > 0
+            Document query = new Document("unidades", new Document("$gt", 0));
+            FindIterable<Document> resultados = farmacia.find(query)
+                .projection(new Document("codigo", 1)
+                            .append("nombre", 1)
+                            .append("dimension", 1)
+                            .append("unidades", 1)
+                            .append("ViaAdmin", 1)
+                            .append("precio", 1)
+                            .append("laboratorio", 1)
+                            .append("_id", 0));
+
+            for (Document doc : resultados) {
+                lista.add(doc);
+            }
+        }
+        return lista;
+    }
+
+    // Método para buscar medicamentos por término (nombre, código, laboratorio)
+    public static List<Document> buscarMedicamentos(String termino) {
+        List<Document> lista = new ArrayList<>();
+        try (MongoClient mongoClient = MongoClients.create(URI)) {
+            MongoDatabase database = mongoClient.getDatabase(DB_INVENTARIO);
+            MongoCollection<Document> farmacia = database.getCollection(COLLECTION_FARMACIA);
+
+            // Query para buscar por nombre, código o laboratorio con stock > 0
+            Document query = new Document("$and", List.of(
+                new Document("unidades", new Document("$gt", 0)),
+                new Document("$or", List.of(
+                    new Document("nombre", new Document("$regex", termino).append("$options", "i")),
+                    new Document("codigo", new Document("$regex", termino).append("$options", "i")),
+                    new Document("laboratorio", new Document("$regex", termino).append("$options", "i"))
+                ))
+            ));
+
+            FindIterable<Document> resultados = farmacia.find(query)
+                .projection(new Document("codigo", 1)
+                            .append("nombre", 1)
+                            .append("dimension", 1)
+                            .append("unidades", 1)
+                            .append("ViaAdmin", 1)
+                            .append("precio", 1)
+                            .append("laboratorio", 1)
+                            .append("_id", 0));
+
+            for (Document doc : resultados) {
+                lista.add(doc);
+            }
+        }
+        return lista;
+    }
+
     public static void main(String[] args) throws IOException {
         String uri = "mongodb://localhost:27017"; // Conexión al contenedor expuesto en tu máquina
 

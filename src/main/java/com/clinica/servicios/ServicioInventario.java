@@ -87,4 +87,56 @@ public class ServicioInventario {
     public static String getModoOperacion() {
         return App.isServidorConectado() ? "SERVIDOR" : "LOCAL";
     }
+
+    // Método para obtener medicamentos con stock > 0
+    public static CompletableFuture<List<Document>> obtenerMedicamentosConStock() {
+        if (App.isServidorConectado()) {
+            // Usar servidor - por ahora usar base de datos local
+            // TODO: Implementar comunicación con servidor para medicamentos
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    return ConexionMongo.obtenerMedicamentosConStock();
+                } catch (Exception e) {
+                    System.err.println("Error al obtener medicamentos con stock: " + e.getMessage());
+                    return List.of();
+                }
+            });
+        } else {
+            // Usar base de datos local
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    return ConexionMongo.obtenerMedicamentosConStock();
+                } catch (Exception e) {
+                    System.err.println("Error al obtener medicamentos con stock local: " + e.getMessage());
+                    return List.of();
+                }
+            });
+        }
+    }
+
+    // Método para buscar medicamentos por término
+    public static CompletableFuture<List<Document>> buscarMedicamentos(String termino) {
+        if (App.isServidorConectado()) {
+            // Usar servidor - por ahora usar base de datos local
+            // TODO: Implementar comunicación con servidor para búsqueda de medicamentos
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    return ConexionMongo.buscarMedicamentos(termino);
+                } catch (Exception e) {
+                    System.err.println("Error al buscar medicamentos: " + e.getMessage());
+                    return List.of();
+                }
+            });
+        } else {
+            // Usar base de datos local
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    return ConexionMongo.buscarMedicamentos(termino);
+                } catch (Exception e) {
+                    System.err.println("Error al buscar medicamentos local: " + e.getMessage());
+                    return List.of();
+                }
+            });
+        }
+    }
 } 

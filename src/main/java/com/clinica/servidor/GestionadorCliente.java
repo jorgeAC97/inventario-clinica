@@ -89,6 +89,12 @@ public class GestionadorCliente implements Runnable {
                 case Protocolo.ACTUALIZAR_UNIDADES_REQUEST:
                     procesarActualizarUnidades(partes, idMensaje);
                     break;
+                case Protocolo.OBTENER_MEDICAMENTOS_INVENTARIO:
+                    procesarObtenerMedicamentosInventario(partes, idMensaje);
+                    break;
+                case Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO:
+                    procesarBuscarMedicamentosInventario(partes, idMensaje);
+                    break;
                 default:
                     enviarError("Código de operación no reconocido: " + codigo, idMensaje);
             }
@@ -176,6 +182,59 @@ public class GestionadorCliente implements Runnable {
         } catch (Exception e) {
             System.err.println("Error al actualizar unidades: " + e.getMessage());
             enviarRespuesta(Protocolo.ACTUALIZAR_UNIDADES_RESPONSE, idMensaje, String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos");
+        }
+    }
+
+    private void procesarObtenerMedicamentosInventario(String[] partes, String idMensaje) {
+        try {
+            // Obtener todos los medicamentos con stock > 0 desde la base de datos
+            List<Document> medicamentos = ConexionMongo.obtenerMedicamentosConStock();
+            
+            // Convertir a JSON y codificar en Base64
+            String jsonData = gson.toJson(medicamentos);
+            String base64Data = Base64.getEncoder().encodeToString(jsonData.getBytes());
+            
+            // Enviar respuesta exitosa
+            enviarRespuesta(Protocolo.OBTENER_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje, 
+                           String.valueOf(Protocolo.SUCCESS), base64Data);
+            
+            System.out.println("Enviados " + medicamentos.size() + " medicamentos al cliente " + clienteInfo);
+            
+        } catch (Exception e) {
+            System.err.println("Error al obtener medicamentos: " + e.getMessage());
+            enviarRespuesta(Protocolo.ERROR_INVENTARIO, idMensaje, 
+                           String.valueOf(Protocolo.DATABASE_ERROR), "Error al obtener medicamentos: " + e.getMessage());
+        }
+    }
+
+    private void procesarBuscarMedicamentosInventario(String[] partes, String idMensaje) {
+        if (partes.length < 3) {
+            enviarRespuesta(Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje, 
+                           String.valueOf(Protocolo.SERVER_ERROR), "Parámetros insuficientes");
+            return;
+        }
+
+        String terminoBusqueda = partes[1];
+
+        try {
+            // Buscar medicamentos por nombre/código/laboratorio
+            List<Document> medicamentosEncontrados = ConexionMongo.buscarMedicamentos(terminoBusqueda);
+
+            // Convertir a JSON y codificar en Base64
+            String jsonData = gson.toJson(medicamentosEncontrados);
+            String base64Data = Base64.getEncoder().encodeToString(jsonData.getBytes());
+
+            // Enviar respuesta exitosa
+            enviarRespuesta(Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje, 
+                           String.valueOf(Protocolo.SUCCESS), base64Data);
+
+            System.out.println("Enviados " + medicamentosEncontrados.size() + 
+                             " medicamentos encontrados para: " + terminoBusqueda + " al cliente " + clienteInfo);
+
+        } catch (Exception e) {
+            System.err.println("Error al buscar medicamentos: " + e.getMessage());
+            enviarRespuesta(Protocolo.ERROR_INVENTARIO, idMensaje, 
+                           String.valueOf(Protocolo.DATABASE_ERROR), "Error al buscar medicamentos: " + e.getMessage());
         }
     }
 
