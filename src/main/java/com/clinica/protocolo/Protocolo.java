@@ -34,6 +34,9 @@ public interface Protocolo {
     static final int BUSCAR_MEDICAMENTOS_INVENTARIO = 9003;
     static final int BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE = 9004;
     static final int ERROR_INVENTARIO = 9999;
+    static final int REDUCIR_INVENTARIO = 9005;
+    static final int REDUCIR_INVENTARIO_RESPONSE = 9006;
+    static final int ERROR_REDUCIR_INVENTARIO = 9007;
     
     // Métodos de utilidad para construir mensajes
     static String construirMensaje(int codigo, String... parametros) {

@@ -1,5 +1,5 @@
 package com.clinica.servidor;
-
+ 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,13 +8,13 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Base64;
 import java.util.List;
-
+ 
 import org.bson.Document;
-
+ 
 import com.clinica.db.ConexionMongo;
 import com.clinica.protocolo.Protocolo;
 import com.google.gson.Gson;
-
+ 
 public class GestionadorCliente implements Runnable {
     private Socket socket;
     private BufferedReader entrada;
@@ -22,7 +22,7 @@ public class GestionadorCliente implements Runnable {
     private boolean conectado;
     private String clienteInfo;
     private Gson gson;
-
+ 
     public GestionadorCliente(Socket socket) {
         this.socket = socket;
         this.conectado = true;
@@ -36,7 +36,7 @@ public class GestionadorCliente implements Runnable {
             this.conectado = false;
         }
     }
-
+ 
     @Override
     public void run() {
         try {
@@ -62,20 +62,20 @@ public class GestionadorCliente implements Runnable {
             desconectar();
         }
     }
-
+ 
     private void procesarMensaje(String mensaje) {
         System.out.println("Mensaje recibido de " + clienteInfo + ": " + mensaje);
-        
+       
         String[] partes = Protocolo.parsearMensaje(mensaje);
         if (partes.length < 2) {
             enviarError("Mensaje malformado", "");
             return;
         }
-
+ 
         try {
             int codigo = Integer.parseInt(partes[0]);
             String idMensaje = partes[partes.length - 1]; // El ID siempre es el último parámetro
-
+ 
             switch (codigo) {
                 case Protocolo.LOGIN_REQUEST:
                     procesarLogin(partes, idMensaje);
@@ -95,6 +95,9 @@ public class GestionadorCliente implements Runnable {
                 case Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO:
                     procesarBuscarMedicamentosInventario(partes, idMensaje);
                     break;
+                case Protocolo.REDUCIR_INVENTARIO:
+                    procesarReducirInventario(partes, idMensaje);
+                    break;
                 default:
                     enviarError("Código de operación no reconocido: " + codigo, idMensaje);
             }
@@ -105,16 +108,16 @@ public class GestionadorCliente implements Runnable {
             enviarError("Error interno del servidor", "");
         }
     }
-
+ 
     private void procesarLogin(String[] partes, String idMensaje) {
         if (partes.length < 4) {
             enviarRespuesta(Protocolo.LOGIN_RESPONSE, idMensaje, String.valueOf(Protocolo.INVALID_CREDENTIALS), "Parámetros insuficientes");
             return;
         }
-
+ 
         String usuario = partes[1];
         String contrasena = partes[2];
-
+ 
         try {
             boolean valido = ConexionMongo.validarCredenciales(usuario, contrasena);
             if (valido) {
@@ -129,15 +132,15 @@ public class GestionadorCliente implements Runnable {
             enviarRespuesta(Protocolo.LOGIN_RESPONSE, idMensaje, String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos");
         }
     }
-
+ 
     private void procesarBuscarFarmacia(String[] partes, String idMensaje) {
         if (partes.length < 3) {
             enviarRespuesta(Protocolo.BUSCAR_FARMACIA_RESPONSE, idMensaje, String.valueOf(Protocolo.SERVER_ERROR), "Parámetros insuficientes");
             return;
         }
-
+ 
         String nombre = partes[1];
-
+ 
         try {
             List<Document> resultados = ConexionMongo.buscarFarmaciaPorNombre(nombre);
             String jsonData = gson.toJson(resultados);
@@ -149,7 +152,7 @@ public class GestionadorCliente implements Runnable {
             enviarRespuesta(Protocolo.BUSCAR_FARMACIA_RESPONSE, idMensaje, String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos");
         }
     }
-
+ 
     private void procesarObtenerFarmacia(String[] partes, String idMensaje) {
         try {
             List<Document> resultados = ConexionMongo.obtenerFarmacia();
@@ -162,16 +165,16 @@ public class GestionadorCliente implements Runnable {
             enviarRespuesta(Protocolo.OBTENER_FARMACIA_RESPONSE, idMensaje, String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos");
         }
     }
-
+ 
     private void procesarActualizarUnidades(String[] partes, String idMensaje) {
         if (partes.length < 4) {
             enviarRespuesta(Protocolo.ACTUALIZAR_UNIDADES_RESPONSE, idMensaje, String.valueOf(Protocolo.SERVER_ERROR), "Parámetros insuficientes");
             return;
         }
-
+ 
         String codigo = partes[1];
         String unidadesStr = partes[2];
-
+ 
         try {
             int unidades = Integer.parseInt(unidadesStr);
             ConexionMongo.actualizarUnidadesProducto(codigo, unidades);
@@ -184,76 +187,124 @@ public class GestionadorCliente implements Runnable {
             enviarRespuesta(Protocolo.ACTUALIZAR_UNIDADES_RESPONSE, idMensaje, String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos");
         }
     }
-
+ 
     private void procesarObtenerMedicamentosInventario(String[] partes, String idMensaje) {
         try {
             // Obtener todos los medicamentos con stock > 0 desde la base de datos
             List<Document> medicamentos = ConexionMongo.obtenerMedicamentosConStock();
-            
+           
             // Convertir a JSON y codificar en Base64
             String jsonData = gson.toJson(medicamentos);
             String base64Data = Base64.getEncoder().encodeToString(jsonData.getBytes());
-            
+           
             // Enviar respuesta exitosa
-            enviarRespuesta(Protocolo.OBTENER_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje, 
+            enviarRespuesta(Protocolo.OBTENER_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje,
                            String.valueOf(Protocolo.SUCCESS), base64Data);
-            
+           
             System.out.println("Enviados " + medicamentos.size() + " medicamentos al cliente " + clienteInfo);
-            
+           
         } catch (Exception e) {
             System.err.println("Error al obtener medicamentos: " + e.getMessage());
-            enviarRespuesta(Protocolo.ERROR_INVENTARIO, idMensaje, 
+            enviarRespuesta(Protocolo.ERROR_INVENTARIO, idMensaje,
                            String.valueOf(Protocolo.DATABASE_ERROR), "Error al obtener medicamentos: " + e.getMessage());
         }
     }
-
+ 
     private void procesarBuscarMedicamentosInventario(String[] partes, String idMensaje) {
         if (partes.length < 3) {
-            enviarRespuesta(Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje, 
+            enviarRespuesta(Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje,
+                           String.valueOf(Protocolo.SERVER_ERROR), "Parámetros insuficientes");
+            return;
+        }
+ 
+        String terminoBusqueda = partes[1];
+ 
+        try {
+            // Buscar medicamentos por nombre/código/laboratorio
+            List<Document> medicamentosEncontrados = ConexionMongo.buscarMedicamentos(terminoBusqueda);
+ 
+            // Convertir a JSON y codificar en Base64
+            String jsonData = gson.toJson(medicamentosEncontrados);
+            String base64Data = Base64.getEncoder().encodeToString(jsonData.getBytes());
+ 
+            // Enviar respuesta exitosa
+            enviarRespuesta(Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje,
+                           String.valueOf(Protocolo.SUCCESS), base64Data);
+ 
+            System.out.println("Enviados " + medicamentosEncontrados.size() +
+                             " medicamentos encontrados para: " + terminoBusqueda + " al cliente " + clienteInfo);
+ 
+        } catch (Exception e) {
+            System.err.println("Error al buscar medicamentos: " + e.getMessage());
+            enviarRespuesta(Protocolo.ERROR_INVENTARIO, idMensaje,
+                           String.valueOf(Protocolo.DATABASE_ERROR), "Error al buscar medicamentos: " + e.getMessage());
+        }
+    }
+ 
+    private void procesarReducirInventario(String[] partes, String idMensaje) {
+        if (partes.length < 4) {
+            enviarRespuesta(Protocolo.ERROR_REDUCIR_INVENTARIO, idMensaje,
                            String.valueOf(Protocolo.SERVER_ERROR), "Parámetros insuficientes");
             return;
         }
 
-        String terminoBusqueda = partes[1];
+        String codigo = partes[1];
+        String cantidadStr = partes[2];
 
         try {
-            // Buscar medicamentos por nombre/código/laboratorio
-            List<Document> medicamentosEncontrados = ConexionMongo.buscarMedicamentos(terminoBusqueda);
-
-            // Convertir a JSON y codificar en Base64
-            String jsonData = gson.toJson(medicamentosEncontrados);
-            String base64Data = Base64.getEncoder().encodeToString(jsonData.getBytes());
-
-            // Enviar respuesta exitosa
-            enviarRespuesta(Protocolo.BUSCAR_MEDICAMENTOS_INVENTARIO_RESPONSE, idMensaje, 
-                           String.valueOf(Protocolo.SUCCESS), base64Data);
-
-            System.out.println("Enviados " + medicamentosEncontrados.size() + 
-                             " medicamentos encontrados para: " + terminoBusqueda + " al cliente " + clienteInfo);
-
+            int cantidad = Integer.parseInt(cantidadStr);
+            
+            if (cantidad <= 0) {
+                enviarRespuesta(Protocolo.ERROR_REDUCIR_INVENTARIO, idMensaje,
+                               String.valueOf(Protocolo.SERVER_ERROR), "La cantidad debe ser mayor a 0");
+                return;
+            }
+            
+            // Intentar reducir unidades usando el método que valida stock
+            boolean exito = ConexionMongo.reducirUnidadesProducto(codigo, cantidad);
+            
+            if (exito) {
+                enviarRespuesta(Protocolo.REDUCIR_INVENTARIO_RESPONSE, idMensaje, 
+                               String.valueOf(Protocolo.SUCCESS), "Inventario reducido exitosamente");
+                System.out.println("Inventario reducido para " + codigo + " - " + cantidad + " unidades desde " + clienteInfo);
+            } else {
+                // Verificar si el producto existe para dar un mensaje más específico
+                int unidadesActuales = ConexionMongo.obtenerUnidadesProducto(codigo);
+                if (unidadesActuales == -1) {
+                    enviarRespuesta(Protocolo.ERROR_REDUCIR_INVENTARIO, idMensaje,
+                                   String.valueOf(Protocolo.NOT_FOUND), "Producto no encontrado");
+                } else {
+                    enviarRespuesta(Protocolo.ERROR_REDUCIR_INVENTARIO, idMensaje,
+                                   String.valueOf(Protocolo.SERVER_ERROR), 
+                                   "Stock insuficiente. Stock actual: " + unidadesActuales + ", solicitado: " + cantidad);
+                }
+            }
+        } catch (NumberFormatException e) {
+            enviarRespuesta(Protocolo.ERROR_REDUCIR_INVENTARIO, idMensaje,
+                           String.valueOf(Protocolo.SERVER_ERROR), "Número de unidades inválido");
         } catch (Exception e) {
-            System.err.println("Error al buscar medicamentos: " + e.getMessage());
-            enviarRespuesta(Protocolo.ERROR_INVENTARIO, idMensaje, 
-                           String.valueOf(Protocolo.DATABASE_ERROR), "Error al buscar medicamentos: " + e.getMessage());
+            System.err.println("Error al reducir inventario: " + e.getMessage());
+            enviarRespuesta(Protocolo.ERROR_REDUCIR_INVENTARIO, idMensaje,
+                           String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos: " + e.getMessage());
         }
     }
-
+ 
     private void enviarRespuesta(int codigoRespuesta, String idMensaje, String estado, String datos) {
         String respuesta = Protocolo.construirMensaje(codigoRespuesta, idMensaje, estado, datos);
         enviarMensaje(respuesta);
     }
-
+ 
     private void enviarError(String mensaje, String idMensaje) {
         String respuesta = Protocolo.construirMensaje(Protocolo.SERVER_ERROR, idMensaje, String.valueOf(Protocolo.SERVER_ERROR), mensaje);
         enviarMensaje(respuesta);
     }
-
+ 
     public void enviarMensaje(String mensaje) {
         if (conectado && salida != null) {
             salida.println(mensaje);
         }
     }
-
+ 
     public void desconectar() {
         if (conectado) {
             conectado = false;
@@ -266,8 +317,9 @@ public class GestionadorCliente implements Runnable {
             }
         }
     }
-
+ 
     public boolean estaConectado() {
         return conectado && !socket.isClosed();
     }
-} 
+}
+ 
