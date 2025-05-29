@@ -98,6 +98,9 @@ public class GestionadorCliente implements Runnable {
                 case Protocolo.REDUCIR_INVENTARIO:
                     procesarReducirInventario(partes, idMensaje);
                     break;
+                case Protocolo.RESTABLECER_INVENTARIO:
+                    procesarRestablecerInventario(partes, idMensaje);
+                    break;
                 default:
                     enviarError("Código de operación no reconocido: " + codigo, idMensaje);
             }
@@ -285,6 +288,57 @@ public class GestionadorCliente implements Runnable {
         } catch (Exception e) {
             System.err.println("Error al reducir inventario: " + e.getMessage());
             enviarRespuesta(Protocolo.ERROR_REDUCIR_INVENTARIO, idMensaje,
+                           String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos: " + e.getMessage());
+        }
+    }
+ 
+    private void procesarRestablecerInventario(String[] partes, String idMensaje) {
+        if (partes.length < 5) {
+            enviarRespuesta(Protocolo.ERROR_RESTABLECER_INVENTARIO, idMensaje,
+                           String.valueOf(Protocolo.SERVER_ERROR), "Parámetros insuficientes: se requiere idFactura, codigoFarmaco y unidades");
+            return;
+        }
+
+        String idFactura = partes[1];
+        String codigoFarmaco = partes[2];
+        String unidadesStr = partes[3];
+
+        try {
+            int unidades = Integer.parseInt(unidadesStr);
+            
+            if (unidades <= 0) {
+                enviarRespuesta(Protocolo.ERROR_RESTABLECER_INVENTARIO, idMensaje,
+                               String.valueOf(Protocolo.SERVER_ERROR), "Las unidades deben ser mayor a 0");
+                return;
+            }
+            
+            // Restaurar las unidades al inventario
+            boolean exito = ConexionMongo.restaurarInventarioBorrador(idFactura, codigoFarmaco, unidades);
+            
+            if (exito) {
+                enviarRespuesta(Protocolo.RESTABLECER_INVENTARIO_RESPONSE, idMensaje, 
+                               String.valueOf(Protocolo.SUCCESS), "Inventario restaurado exitosamente");
+                System.out.println("Inventario restaurado - Factura: " + idFactura + 
+                                 ", Producto: " + codigoFarmaco + 
+                                 ", Unidades: " + unidades + 
+                                 " desde " + clienteInfo);
+            } else {
+                // Verificar si el producto existe para dar un mensaje más específico
+                int unidadesActuales = ConexionMongo.obtenerUnidadesProducto(codigoFarmaco);
+                if (unidadesActuales == -1) {
+                    enviarRespuesta(Protocolo.ERROR_RESTABLECER_INVENTARIO, idMensaje,
+                                   String.valueOf(Protocolo.NOT_FOUND), "Producto no encontrado: " + codigoFarmaco);
+                } else {
+                    enviarRespuesta(Protocolo.ERROR_RESTABLECER_INVENTARIO, idMensaje,
+                                   String.valueOf(Protocolo.SERVER_ERROR), "Error al restaurar inventario");
+                }
+            }
+        } catch (NumberFormatException e) {
+            enviarRespuesta(Protocolo.ERROR_RESTABLECER_INVENTARIO, idMensaje,
+                           String.valueOf(Protocolo.SERVER_ERROR), "Número de unidades inválido");
+        } catch (Exception e) {
+            System.err.println("Error al restaurar inventario: " + e.getMessage());
+            enviarRespuesta(Protocolo.ERROR_RESTABLECER_INVENTARIO, idMensaje,
                            String.valueOf(Protocolo.DATABASE_ERROR), "Error de base de datos: " + e.getMessage());
         }
     }

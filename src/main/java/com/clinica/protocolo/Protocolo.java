@@ -37,6 +37,9 @@ public interface Protocolo {
     static final int REDUCIR_INVENTARIO = 9005;
     static final int REDUCIR_INVENTARIO_RESPONSE = 9006;
     static final int ERROR_REDUCIR_INVENTARIO = 9007;
+    static final int RESTABLECER_INVENTARIO = 9008;
+    static final int RESTABLECER_INVENTARIO_RESPONSE = 9009;
+    static final int ERROR_RESTABLECER_INVENTARIO = 9010;
     
     // Métodos de utilidad para construir mensajes
     static String construirMensaje(int codigo, String... parametros) {

@@ -230,6 +230,48 @@ public class ConexionMongo {
             return true;
         }
     }
+    
+    // Método para restaurar unidades al inventario cuando se cancela una factura en borrador
+    public static boolean restaurarInventarioBorrador(String idFactura, String codigoFarmaco, int unidadesARestaurar) {
+        try (MongoClient mongoClient = MongoClients.create(URI)) {
+            MongoDatabase database = mongoClient.getDatabase(DB_INVENTARIO);
+            MongoCollection<Document> farmacia = database.getCollection(COLLECTION_FARMACIA);
+            
+            // Verificar que el producto existe
+            Document query = new Document("codigo", codigoFarmaco);
+            Document producto = farmacia.find(query).first();
+            
+            if (producto == null) {
+                System.err.println("Producto no encontrado al restaurar inventario: " + codigoFarmaco);
+                return false; // Producto no encontrado
+            }
+            
+            // Validar que las unidades a restaurar son positivas
+            if (unidadesARestaurar <= 0) {
+                System.err.println("Las unidades a restaurar deben ser positivas: " + unidadesARestaurar);
+                return false;
+            }
+            
+            // Obtener unidades actuales y sumar las unidades restauradas
+            int unidadesActuales = producto.getInteger("unidades", 0);
+            int nuevasUnidades = unidadesActuales + unidadesARestaurar;
+            
+            // Actualizar las unidades
+            Document update = new Document("$set", new Document("unidades", nuevasUnidades));
+            farmacia.updateOne(query, update);
+            
+            System.out.println("Inventario restaurado - Factura: " + idFactura + 
+                             ", Producto: " + codigoFarmaco + 
+                             ", Unidades restauradas: " + unidadesARestaurar +
+                             ", Stock anterior: " + unidadesActuales + 
+                             ", Stock actual: " + nuevasUnidades);
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al restaurar inventario: " + e.getMessage());
+            return false;
+        }
+    }
  
     public static void main(String[] args) throws IOException {
         String uri = "mongodb://localhost:27017"; // Conexión al contenedor expuesto en tu máquina
