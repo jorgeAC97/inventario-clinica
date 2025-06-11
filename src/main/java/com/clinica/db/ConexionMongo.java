@@ -273,6 +273,29 @@ public class ConexionMongo {
         }
     }
  
+    // Método para verificar si existe la colección farmacia
+    public static boolean existeColeccionFarmacia() {
+        try (MongoClient mongoClient = MongoClients.create(URI)) {
+            MongoDatabase database = mongoClient.getDatabase(DB_INVENTARIO);
+            
+            // Verificar si la colección existe y tiene datos
+            boolean existe = false;
+            for (String nombreColeccion : database.listCollectionNames()) {
+                if (COLLECTION_FARMACIA.equals(nombreColeccion)) {
+                    // Verificar que tenga al menos un documento
+                    MongoCollection<Document> farmacia = database.getCollection(COLLECTION_FARMACIA);
+                    existe = farmacia.countDocuments() > 0;
+                    break;
+                }
+            }
+            
+            return existe;
+        } catch (Exception e) {
+            System.err.println("Error al verificar la colección farmacia: " + e.getMessage());
+            return false;
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         String uri = "mongodb://localhost:27017"; // Conexión al contenedor expuesto en tu máquina
  

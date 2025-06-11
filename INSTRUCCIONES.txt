@@ -2,69 +2,110 @@
   INVENTARIO CLINICA - INSTRUCCIONES
 =====================================
 
-ARCHIVOS DISPONIBLES:
----------------------
+🚀 ARCHIVOS PRINCIPALES:
+------------------------
 
-VERSIONES PRINCIPALES:
-1. iniciar-servidor.bat
+1. servidor.bat
    - Compila e inicia el servidor de red
    - Puerto: 50005
    - Permite conexiones de múltiples clientes
    - Presiona Ctrl+C para detener
 
-2. iniciarAppInventario.bat  
+2. aplicacion.bat  
    - Compila e inicia la aplicación JavaFX
+   - Verifica e importa datos automáticamente si no existen
    - Se conecta automáticamente al servidor si está disponible
    - Si no hay servidor, funciona en modo local
 
-VERSIONES ALTERNATIVAS (si las principales fallan):
-3. iniciar-servidor-v2.bat
-   - Versión más robusta del servidor
-   - Mejor manejo de errores
-   - Compatible con cmd nativo
+📋 NOVEDADES:
+-------------
+✅ Auto-importación de datos de farmacia (primera vez)
+✅ Verificación automática de la base de datos
+✅ Simplicidad: solo 2 archivos .bat necesarios
+✅ Mejor manejo de errores y progreso visual
 
-4. iniciarAppInventario-v2.bat
-   - Versión más robusta de la aplicación
-   - Mejores mensajes de error
-   - Compatible con cmd nativo
+🎯 COMO USAR:
+-------------
 
-5. detener-procesos.bat
-   - Detiene procesos Java colgados si es necesario
-
-COMO USAR:
-----------
-
-OPCIÓN 1 - Con servidor (recomendado):
-1. Ejecuta primero: iniciar-servidor.bat
-2. En otra ventana ejecuta: iniciarAppInventario.bat
+OPCIÓN 1 - Con servidor (RECOMENDADO):
+1. Terminal 1: servidor.bat
+2. Terminal 2: aplicacion.bat
 3. La app se conectará al servidor automáticamente
 
 OPCIÓN 2 - Solo local:
-1. Ejecuta solamente: iniciarAppInventario.bat
+1. Ejecuta solamente: aplicacion.bat
 2. La app funcionará en modo local sin servidor
 
-REQUISITOS:
------------
-- Java 11 o superior
+⚙️ REQUISITOS:
+--------------
+- Java 11 o superior instalado
 - Maven instalado y en el PATH
-- MongoDB ejecutándose (para funcionalidades completas)
+- MongoDB ejecutándose en puerto 27017
 
-SOLUCIÓN DE PROBLEMAS:
----------------------
+🗄️ BASE DE DATOS:
+-----------------
+La aplicación crea automáticamente:
+- Base de datos: "Inventario" con colección "farmacia"
+- Base de datos: "Empresa" con colección "usuarios"
+- Los datos se importan automáticamente la primera vez
 
-Si falla la compilación:
-- Verifica que Java 11+ esté instalado: java -version
-- Verifica que Maven esté instalado: mvn -version
-- Ejecuta: mvn clean compile
+🔧 SOLUCIÓN DE PROBLEMAS:
+------------------------
 
-Si la app no se conecta al servidor:
-- Asegurate de que el servidor esté ejecutándose primero
-- Verifica que no haya firewall bloqueando el puerto 50005
+❌ Error de compilación:
+   → mvn clean compile
+   → Verificar Java 11+: java -version
+   → Verificar Maven: mvn -version
 
-Si hay errores de JavaFX:
-- Verifica la instalación de Java 11+
-- En algunos sistemas puede requerir configuración adicional de JavaFX
+❌ MongoDB no conecta:
+   → Verificar que MongoDB esté ejecutándose
+   → Puerto 27017 debe estar disponible
 
-CONTACTO:
----------
-Si tienes problemas, revisa los logs en la consola para más detalles. 
+❌ App no se conecta al servidor:
+   → Ejecutar servidor.bat primero
+   → Verificar que puerto 50005 esté libre
+   → Revisar firewall
+
+❌ JavaFX no inicia:
+   → Verificar instalación de Java 11+
+   → Revisar variables de entorno JAVA_HOME
+
+❌ Procesos Java colgados:
+   → taskkill /F /IM java.exe
+
+📊 COMANDOS ÚTILES:
+-------------------
+# Limpiar proyecto
+mvn clean compile
+
+# Solo servidor
+mvn exec:java -Dexec.mainClass="com.clinica.servidor.Servidor"
+
+# Solo aplicación
+mvn javafx:run
+
+# Ver procesos Java
+tasklist | findstr java
+
+🎓 MODO DE OPERACIÓN:
+--------------------
+La aplicación indica su modo en la pantalla de login:
+- 🟢 "Modo: SERVIDOR" - Conectado al servidor
+- 🟠 "Modo: LOCAL" - Funcionando localmente
+
+💡 TIPS:
+--------
+- La primera ejecución puede tardar más (importa datos)
+- Mantén MongoDB ejecutándose para mejor rendimiento
+- El servidor permite múltiples usuarios simultáneos
+- Los archivos .bat muestran progreso [1/2] [2/2]
+
+📞 SOPORTE:
+-----------
+Si tienes problemas:
+1. Revisa los logs en la consola
+2. Verifica que MongoDB esté ejecutándose
+3. Asegurar Java 11+ y Maven instalados
+4. Verificar puertos disponibles (27017, 50005)
+
+¡Sistema listo para usar! 🎉 

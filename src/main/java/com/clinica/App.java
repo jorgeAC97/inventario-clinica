@@ -3,6 +3,8 @@ package com.clinica;
 import java.io.IOException;
 
 import com.clinica.cliente.ClienteComunicacion;
+import com.clinica.db.ConexionMongo;
+import com.clinica.db.ImportarDatos;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -38,8 +40,31 @@ public class App extends Application {
         }
     }
 
+    private void verificarYCargarDatos() {
+        System.out.println("Verificando datos de la base de datos...");
+        
+        try {
+            if (!ConexionMongo.existeColeccionFarmacia()) {
+                System.out.println("La colección 'farmacia' no existe o está vacía.");
+                System.out.println("Iniciando importación de datos...");
+                
+                // Ejecutar ImportarDatos
+                ImportarDatos.main(new String[]{});
+                System.out.println("Datos importados correctamente.");
+            } else {
+                System.out.println("La colección 'farmacia' ya existe con datos.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error al verificar/importar datos: " + e.getMessage());
+            System.out.println("La aplicación continuará sin datos iniciales.");
+        }
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
+        // Verificar y cargar datos si es necesario
+        verificarYCargarDatos();
+        
         // Intentar conectar al servidor (opcional)
         conectarServidor();
         
