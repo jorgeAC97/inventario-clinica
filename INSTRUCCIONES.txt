@@ -1,0 +1,70 @@
+=====================================
+  INVENTARIO CLINICA - INSTRUCCIONES
+=====================================
+
+ARCHIVOS DISPONIBLES:
+---------------------
+
+VERSIONES PRINCIPALES:
+1. iniciar-servidor.bat
+   - Compila e inicia el servidor de red
+   - Puerto: 50005
+   - Permite conexiones de múltiples clientes
+   - Presiona Ctrl+C para detener
+
+2. iniciarAppInventario.bat  
+   - Compila e inicia la aplicación JavaFX
+   - Se conecta automáticamente al servidor si está disponible
+   - Si no hay servidor, funciona en modo local
+
+VERSIONES ALTERNATIVAS (si las principales fallan):
+3. iniciar-servidor-v2.bat
+   - Versión más robusta del servidor
+   - Mejor manejo de errores
+   - Compatible con cmd nativo
+
+4. iniciarAppInventario-v2.bat
+   - Versión más robusta de la aplicación
+   - Mejores mensajes de error
+   - Compatible con cmd nativo
+
+5. detener-procesos.bat
+   - Detiene procesos Java colgados si es necesario
+
+COMO USAR:
+----------
+
+OPCIÓN 1 - Con servidor (recomendado):
+1. Ejecuta primero: iniciar-servidor.bat
+2. En otra ventana ejecuta: iniciarAppInventario.bat
+3. La app se conectará al servidor automáticamente
+
+OPCIÓN 2 - Solo local:
+1. Ejecuta solamente: iniciarAppInventario.bat
+2. La app funcionará en modo local sin servidor
+
+REQUISITOS:
+-----------
+- Java 11 o superior
+- Maven instalado y en el PATH
+- MongoDB ejecutándose (para funcionalidades completas)
+
+SOLUCIÓN DE PROBLEMAS:
+---------------------
+
+Si falla la compilación:
+- Verifica que Java 11+ esté instalado: java -version
+- Verifica que Maven esté instalado: mvn -version
+- Ejecuta: mvn clean compile
+
+Si la app no se conecta al servidor:
+- Asegurate de que el servidor esté ejecutándose primero
+- Verifica que no haya firewall bloqueando el puerto 50005
+
+Si hay errores de JavaFX:
+- Verifica la instalación de Java 11+
+- En algunos sistemas puede requerir configuración adicional de JavaFX
+
+CONTACTO:
+---------
+Si tienes problemas, revisa los logs en la consola para más detalles. 
