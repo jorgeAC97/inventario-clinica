@@ -10,4 +10,8 @@ module com.clinica {
     opens com.clinica.Controladores to javafx.fxml;
     exports com.clinica;
     exports com.clinica.Controladores;
+    exports com.clinica.cliente;
+    exports com.clinica.servicios;
+    exports com.clinica.protocolo;
+    exports com.clinica.servidor;
 }

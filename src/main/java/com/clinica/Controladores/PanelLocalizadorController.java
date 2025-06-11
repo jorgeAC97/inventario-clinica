@@ -1,11 +1,10 @@
 package com.clinica.Controladores;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.bson.Document;
+import com.clinica.servicios.ServicioInventario;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -127,11 +126,20 @@ public class PanelLocalizadorController {
     private void buscar() {
         String nombre = txtBuscar.getText();
         executorService.submit(() -> {
-            List<Document> resultados = com.clinica.db.ConexionMongo.buscarFarmaciaPorNombre(nombre);
-            System.out.println("Buscando: " + nombre + " - Resultados: " + resultados.size());
-            if (resultadosController != null) {
-                Platform.runLater(() -> resultadosController.mostrarResultados(resultados));
-            }
+            ServicioInventario.buscarFarmacia(nombre)
+                .thenAccept(resultados -> {
+                    System.out.println("Buscando: " + nombre + " - Resultados: " + resultados.size() + " (Modo: " + ServicioInventario.getModoOperacion() + ")");
+                    if (resultadosController != null) {
+                        Platform.runLater(() -> resultadosController.mostrarResultados(resultados));
+                    }
+                })
+                .exceptionally(throwable -> {
+                    System.err.println("Error en búsqueda: " + throwable.getMessage());
+                    if (resultadosController != null) {
+                        Platform.runLater(() -> resultadosController.limpiarResultados());
+                    }
+                    return null;
+                });
         });
     }
 
