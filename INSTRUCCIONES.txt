@@ -1,0 +1,111 @@
+=====================================
+  INVENTARIO CLINICA - INSTRUCCIONES
+=====================================
+
+🚀 ARCHIVOS PRINCIPALES:
+------------------------
+
+1. servidor.bat
+   - Compila e inicia el servidor de red
+   - Puerto: 50005
+   - Permite conexiones de múltiples clientes
+   - Presiona Ctrl+C para detener
+
+2. aplicacion.bat  
+   - Compila e inicia la aplicación JavaFX
+   - Verifica e importa datos automáticamente si no existen
+   - Se conecta automáticamente al servidor si está disponible
+   - Si no hay servidor, funciona en modo local
+
+📋 NOVEDADES:
+-------------
+✅ Auto-importación de datos de farmacia (primera vez)
+✅ Verificación automática de la base de datos
+✅ Simplicidad: solo 2 archivos .bat necesarios
+✅ Mejor manejo de errores y progreso visual
+
+🎯 COMO USAR:
+-------------
+
+OPCIÓN 1 - Con servidor (RECOMENDADO):
+1. Terminal 1: servidor.bat
+2. Terminal 2: aplicacion.bat
+3. La app se conectará al servidor automáticamente
+
+OPCIÓN 2 - Solo local:
+1. Ejecuta solamente: aplicacion.bat
+2. La app funcionará en modo local sin servidor
+
+⚙️ REQUISITOS:
+--------------
+- Java 11 o superior instalado
+- Maven instalado y en el PATH
+- MongoDB ejecutándose en puerto 27017
+
+🗄️ BASE DE DATOS:
+-----------------
+La aplicación crea automáticamente:
+- Base de datos: "Inventario" con colección "farmacia"
+- Base de datos: "Empresa" con colección "usuarios"
+- Los datos se importan automáticamente la primera vez
+
+🔧 SOLUCIÓN DE PROBLEMAS:
+------------------------
+
+❌ Error de compilación:
+   → mvn clean compile
+   → Verificar Java 11+: java -version
+   → Verificar Maven: mvn -version
+
+❌ MongoDB no conecta:
+   → Verificar que MongoDB esté ejecutándose
+   → Puerto 27017 debe estar disponible
+
+❌ App no se conecta al servidor:
+   → Ejecutar servidor.bat primero
+   → Verificar que puerto 50005 esté libre
+   → Revisar firewall
+
+❌ JavaFX no inicia:
+   → Verificar instalación de Java 11+
+   → Revisar variables de entorno JAVA_HOME
+
+❌ Procesos Java colgados:
+   → taskkill /F /IM java.exe
+
+📊 COMANDOS ÚTILES:
+-------------------
+# Limpiar proyecto
+mvn clean compile
+
+# Solo servidor
+mvn exec:java -Dexec.mainClass="com.clinica.servidor.Servidor"
+
+# Solo aplicación
+mvn javafx:run
+
+# Ver procesos Java
+tasklist | findstr java
+
+🎓 MODO DE OPERACIÓN:
+--------------------
+La aplicación indica su modo en la pantalla de login:
+- 🟢 "Modo: SERVIDOR" - Conectado al servidor
+- 🟠 "Modo: LOCAL" - Funcionando localmente
+
+💡 TIPS:
+--------
+- La primera ejecución puede tardar más (importa datos)
+- Mantén MongoDB ejecutándose para mejor rendimiento
+- El servidor permite múltiples usuarios simultáneos
+- Los archivos .bat muestran progreso [1/2] [2/2]
+
+📞 SOPORTE:
+-----------
+Si tienes problemas:
+1. Revisa los logs en la consola
+2. Verifica que MongoDB esté ejecutándose
+3. Asegurar Java 11+ y Maven instalados
+4. Verificar puertos disponibles (27017, 50005)
+
+¡Sistema listo para usar! 🎉 
